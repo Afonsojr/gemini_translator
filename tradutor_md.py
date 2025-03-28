@@ -1,3 +1,10 @@
+# /// script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "google-generativeai",
+#     "rich",
+# ]
+# ///
 import google.generativeai as genai
 import configparser
 import argparse
