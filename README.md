@@ -1,5 +1,7 @@
 # Tradutor de Markdown com Gemini API
 
+[![Repositório GitHub](https://img.shields.io/badge/GitHub-Repositório-blue?logo=github)](https://github.com/Afonsojr/gemini_translator.git)
+
 Este script Python utiliza a API Generative AI do Google (Gemini) para traduzir arquivos de texto formatados em Markdown (`.md`) para diferentes idiomas, esforçando-se para manter a formatação original.
 
 ## ✨ Recursos Principais
@@ -21,24 +23,32 @@ Este script Python utiliza a API Generative AI do Google (Gemini) para traduzir 
 
 ## 🚀 Instalação
 
-1.  **Clone o repositório ou baixe o script:**
+1.  **Clone o repositório:**
     ```bash
-    # Se for um repositório git
-    git clone <url_do_repositorio>
-    cd <diretorio_do_repositorio>
+    git clone https://github.com/Afonsojr/gemini_translator.git
+    cd gemini_translator
     ```
-    Ou simplesmente salve o arquivo `tradutor_md.py`.
 
-2.  **Instale as dependências:**
+2.  **Instale as dependências usando `uv`:**
+    (Certifique-se de ter o `uv` instalado: https://github.com/astral-sh/uv)
     ```bash
-    pip install google-generativeai rich
+    uv pip install google-generativeai rich
     ```
+    *Alternativamente, se houver um `requirements.txt` ou `pyproject.toml` configurado, você pode usar `uv pip sync`.*
 
 ## 🔧 Configuração
 
-1.  **Crie o arquivo `config.ini`:** No mesmo diretório do script `tradutor_md.py`, crie um arquivo chamado `config.ini`.
+1.  **Renomeie o arquivo template:** No diretório do projeto, renomeie o arquivo `base.ini` para `config.ini`. O `base.ini` serve como um modelo.
+    ```bash
+    # No Linux/macOS
+    mv base.ini config.ini
+    # No Windows (Command Prompt)
+    rename base.ini config.ini
+    # No Windows (PowerShell)
+    Rename-Item base.ini config.ini
+    ```
 
-2.  **Adicione suas configurações:** Copie e cole o seguinte conteúdo no `config.ini`, substituindo pelos seus dados:
+2.  **Adicione suas configurações ao `config.ini`:** Abra o `config.ini` e edite o conteúdo, substituindo pelos seus dados:
 
     ```ini
     [gemini]
@@ -56,12 +66,12 @@ Este script Python utiliza a API Generative AI do Google (Gemini) para traduzir 
 
 ## ▶️ Uso
 
-Execute o script a partir do seu terminal.
+Execute o script a partir do seu terminal usando `uv run`.
 
 **Sintaxe básica:**
 
 ```bash
-python tradutor_md.py <arquivo_entrada.md> [opções]
+uv run python tradutor_md.py <arquivo_entrada.md> [opções]
 ```
 
 **Argumentos:**
@@ -79,17 +89,17 @@ python tradutor_md.py <arquivo_entrada.md> [opções]
 
 1.  **Traduzir `meu_doc.md` para Português Brasileiro e imprimir no console:**
     ```bash
-    python tradutor_md.py meu_doc.md
+    uv run python tradutor_md.py meu_doc.md
     ```
 
 2.  **Traduzir `readme_en.md` para Espanhol e salvar como `readme_es.md`:**
     ```bash
-    python tradutor_md.py readme_en.md -l "Espanhol" -o readme_es.md
+    uv run python tradutor_md.py readme_en.md -l "Espanhol" -o readme_es.md
     ```
 
 3.  **Traduzir `info.md` para Inglês usando um arquivo de configuração diferente:**
     ```bash
-    python tradutor_md.py info.md -l "Inglês" -c /caminho/para/meu_gemini_config.ini -o info_en.md
+    uv run python tradutor_md.py info.md -l "Inglês" -c /caminho/para/meu_gemini_config.ini -o info_en.md
     ```
 
 ## 📄 Licença
