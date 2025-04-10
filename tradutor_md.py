@@ -334,6 +334,35 @@ def salvar_traducao(filepath: Path, blocos_traduzidos: list[str]):
         )
 
 
+def idioma_para_codigo(idioma: str) -> str:
+    """Converte um nome de idioma para um código curto para uso no nome do arquivo."""
+    mapeamento = {
+        "português brasileiro": "pt-br",
+        "português": "pt",
+        "inglês": "en",
+        "espanhol": "es",
+        "francês": "fr",
+        "alemão": "de",
+        "italiano": "it",
+        "japonês": "ja",
+        "chinês": "zh",
+        "russo": "ru",
+        "coreano": "ko",
+        "árabe": "ar",
+        # Adicione outros idiomas conforme necessário
+    }
+    # Normaliza removendo acentos, convertendo para minúsculas
+    import unicodedata
+
+    idioma_norm = "".join(
+        c
+        for c in unicodedata.normalize("NFD", idioma.lower())
+        if unicodedata.category(c) != "Mn"
+    )
+    # Retorna o código do idioma ou uma versão simplificada do nome se não encontrado
+    return mapeamento.get(idioma_norm, idioma_norm.replace(" ", "-"))
+
+
 def main():
     """Função principal do script."""
     parser = argparse.ArgumentParser(
@@ -346,7 +375,7 @@ def main():
     parser.add_argument(
         "-o",
         "--output",
-        help="Caminho para o arquivo de saída. Se não especificado, imprime na tela.",
+        help="Caminho para o arquivo de saída. Se não especificado, será criado com base no nome do arquivo de entrada com sufixo do idioma.",
     )
     parser.add_argument(
         "-l",
@@ -363,11 +392,41 @@ def main():
     args = parser.parse_args()
 
     input_path = Path(args.arquivo_entrada)
-    config_path = Path(args.config)
+
+    # --- Determina o caminho para o arquivo de saída ---
+    if args.output:
+        # Se o usuário especificou um arquivo de saída, usa esse valor
+        output_path = Path(args.output)
+    else:
+        # Caso contrário, gera um nome baseado no arquivo de entrada e no idioma
+        # Obtém o código do idioma (ex: "pt-br" para "Português Brasileiro")
+        codigo_idioma = idioma_para_codigo(args.lang)
+
+        # Extrai o nome do arquivo sem extensão e o diretório
+        nome_arquivo = input_path.stem  # Nome sem extensão
+        extensao = input_path.suffix  # Extensão (.md)
+        diretorio = input_path.parent  # Diretório onde o arquivo está
+
+        # Gera o novo nome: nome_original_codigo-idioma.extensao
+        novo_nome = f"{nome_arquivo}_{codigo_idioma}{extensao}"
+        output_path = diretorio / novo_nome
+
+        console.print(f"[blue]📄 Arquivo de saída:[/blue] [cyan]{output_path}[/cyan]")
+    # --- Fim da determinação do caminho ---
+
+    # Determinação do caminho do config.ini
+    script_dir = Path(__file__).resolve().parent  # Diretório onde o script está
+    config_path_arg = Path(args.config)
+
+    if not config_path_arg.is_absolute():
+        config_path = script_dir / config_path_arg
+    else:
+        config_path = config_path_arg
+
     idioma_destino = args.lang
 
     # --- Configuração ---
-    config = ler_config(config_path)
+    config = ler_config(config_path)  # Agora usa o config_path ajustado
     # Lê a string de chaves separadas por vírgula
     api_keys_str = config.get("gemini", "api_keys", fallback="")
     model_name = config.get("gemini", "model_name", fallback="gemini-1.5-flash")
@@ -461,18 +520,7 @@ def main():
     blocos_traduzidos = traduzir_blocos(blocos, model, idioma_destino)
 
     # --- Saída ---
-    if args.output:
-        output_path = Path(args.output)
-        # Garante que o diretório de saída exista
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        salvar_traducao(output_path, blocos_traduzidos)
-    else:
-        console.rule("[bold blue]📜 Tradução Completa (Saída no Console)", style="blue")
-        for i, bloco in enumerate(blocos_traduzidos):
-            rprint(Markdown(bloco))
-            if i < len(blocos_traduzidos) - 1:  # Adiciona separador visual entre blocos
-                console.print("---", style="dim cyan")
-        console.rule("[bold blue]🏁 Fim da Tradução", style="blue")
+    salvar_traducao(output_path, blocos_traduzidos)
 
 
 if __name__ == "__main__":
